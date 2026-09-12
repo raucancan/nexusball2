@@ -162,6 +162,48 @@
       box-shadow: 0 0 8px rgba(250, 204, 21, 0.2);
     }
 
+    /* Game Mode Selector (Lobby) */
+    .mode-select-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .mode-select-btn {
+      flex: 1;
+      padding: 12px 6px;
+      font-size: 13px;
+      border-radius: 8px;
+      border: 1px solid #3f3f46;
+      background: #18181b;
+      color: #f4f4f5;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      transition: 0.2s;
+    }
+    .mode-select-btn:hover {
+      background: #27272a;
+      border-color: #facc15;
+    }
+    .mode-select-btn.active {
+      border-color: #facc15;
+      color: #0f172a;
+      background: #facc15;
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.35);
+    }
+    .mode-badge {
+      display: inline-block;
+      margin-left: 12px;
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #0f172a;
+      background: #facc15;
+    }
+
     /* Fixed 11-card list: no scroll needed, sizing is compact by design */
     .player-list {
       display: flex;
@@ -411,13 +453,15 @@
       border-radius: 12px;
       padding: 24px;
       width: 340px;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 10px;
       align-items: stretch;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
-    .menu-box.wide { width: 100%; max-width: 560px; }
+    .menu-box.wide { width: 100%; max-width: 560px; min-width: 0; }
+    #tournamentResults { min-width: 0; max-width: 100%; width: 100%; }
     .menu-box h2 {
       color: #facc15;
       font-size: 18px;
@@ -768,6 +812,9 @@
       flex-direction: column;
       gap: 10px;
       align-items: center;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
     }
     .league-match-header {
       font-size: 12px;
@@ -795,6 +842,9 @@
       gap: 6px;
       overflow-x: auto;
       width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      flex-wrap: nowrap;
       padding: 8px 4px;
       background: #09090b;
       border: 1px solid #27272a;
@@ -805,6 +855,7 @@
     .league-form-strip::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
     .form-box {
       min-width: 28px;
+      flex-shrink: 0;
       height: 28px;
       border-radius: 6px;
       display: flex;
@@ -1037,9 +1088,18 @@
         <button class="copy-btn" onclick="copyRoomCode()">Kopyala</button>
       </div>
       <div class="tournament-hint">Arkadaşların bu kodu "Odaya Katıl" kısmına girerek katılabilir.</div>
+      <div id="gameModeHostControls" style="display:none; width:100%;">
+        <div style="font-size:12px; color:#a1a1aa; margin-bottom:4px;">Oyun Modu:</div>
+        <div class="mode-select-row">
+          <button class="mode-select-btn" id="modeBtnBuilder" onclick="setGameMode('builder')">NEXUSBUILDER</button>
+          <button class="mode-select-btn" id="modeBtnDraft" onclick="setGameMode('draft')">NEXUSDRAFT</button>
+        </div>
+      </div>
+      <div id="gameModeInfo" class="tournament-hint" style="display:none;"></div>
       <div id="draftTimerHostControls" style="display:none; width:100%;">
         <div style="font-size:12px; color:#a1a1aa; margin-bottom:4px;">Oyuncu Seçme Süresi:</div>
         <div class="timer-opt-row">
+          <button class="timer-opt-btn" data-sec="1" onclick="setDraftTimerDuration(1)">1s</button>
           <button class="timer-opt-btn" data-sec="10" onclick="setDraftTimerDuration(10)">10s</button>
           <button class="timer-opt-btn" data-sec="15" onclick="setDraftTimerDuration(15)">15s</button>
           <button class="timer-opt-btn" data-sec="20" onclick="setDraftTimerDuration(20)">20s</button>
@@ -1081,9 +1141,9 @@
       <h2>Playoff Oyun Planı</h2>
       <div id="tacticInfo" class="tournament-hint"></div>
       <div id="tacticButtons" style="display:none; flex-direction:column; gap:8px; width:100%;">
-        <button class="main-btn btn-sim" onclick="chooseTactic('agresif')">Agresif <span style="font-weight:normal; color:#3f3f46; font-size:11px;">— daha çok atar, daha çok yersin</span></button>
-        <button class="main-btn btn-sim" onclick="chooseTactic('dengeli')">Dengeli <span style="font-weight:normal; color:#3f3f46; font-size:11px;">— standart oyun planı</span></button>
-        <button class="main-btn btn-sim" onclick="chooseTactic('savunma')">Savunma <span style="font-weight:normal; color:#3f3f46; font-size:11px;">— az gol yer, az gol atarsın</span></button>
+        <button class="main-btn btn-sim" onclick="chooseTactic('ofansif')">Ofansif <span style="font-weight:normal; color:#3f3f46; font-size:11px;">— hücum hattın güçlüyse çok daha etkili, savunman zayıfsa risklidir</span></button>
+        <button class="main-btn btn-sim" onclick="chooseTactic('dengeli')">Dengeli <span style="font-weight:normal; color:#3f3f46; font-size:11px;">— standart oyun planı, hat kalitene göre hafif etki</span></button>
+        <button class="main-btn btn-sim" onclick="chooseTactic('defansif')">Defansif <span style="font-weight:normal; color:#3f3f46; font-size:11px;">— savunma hattın güçlüyse gol yeme oranın ciddi düşer</span></button>
       </div>
       <div id="tacticWaitMsg" class="tournament-hint" style="display:none;"></div>
     </div>
@@ -1117,6 +1177,7 @@
       <div style="margin-left: 20px; color: #a1a1aa; font-size: 13px;">
         İlk 11: <b id="squadCount" style="color: #facc15;">0</b> / 11
       </div>
+      <span class="mode-badge" id="modeBadge">NEXUSBUILDER</span>
     </div>
 
     <div class="app-layout">
@@ -1961,6 +2022,7 @@
 
     let activeFormation = "4-3-3";
     let pitchSquad = Array(11).fill(null);
+    let gameMode = 'builder'; // 'builder' = NEXUSBUILDER (kulüp bazlı), 'draft' = NEXUSDRAFT (FUT draft tarzı)
     let usedClubs = [];
     let currentClub = null;
     let currentClubPlayers = [];
@@ -1987,7 +2049,12 @@
 
     function init() {
       renderPitchSlots();
-      loadNextClub();
+      applyGameModeUI();
+      if (gameMode === 'draft') {
+        startNexusDraftSlot();
+      } else {
+        loadNextClub();
+      }
     }
 
     function startTimer() {
@@ -2019,6 +2086,7 @@
     }
 
     function autoSelectLowestPlayer() {
+      if (gameMode === 'draft') { autoPickNexusDraftOption(); return; }
       if (filledCount >= 11) return;
 
       const posData = formations[activeFormation];
@@ -2060,6 +2128,184 @@
     function changeFormation() {
       activeFormation = document.getElementById("formationSelect").value;
       renderPitchSlots();
+    }
+
+    // ============================================================
+    // NEXUSDRAFT MODU (FUT Draft tarzı - pozisyon pozisyon 5 aday)
+    // ============================================================
+    let nexusDraftPool = [];
+    let nexusDraftOptions = [];
+
+    const positionFullNames = {
+      KL: "Kaleci", STP: "Stoper", SLB: "Sol Bek", SĞB: "Sağ Bek",
+      DOS: "Defansif Orta Saha", OS: "Orta Saha", OOS: "Ofansif Orta Saha",
+      SLK: "Sol Kanat", SĞK: "Sağ Kanat", SF: "Santrfor"
+    };
+
+    function positionFullName(label) {
+      return positionFullNames[label] || label;
+    }
+
+    function shuffleArray(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // Sıralı (rating büyükten küçüğe) bir listeden, birbirine yakın rating'li
+    // 'count' adet aday seçer. Rastgele bir bant (dar bir pencere) belirlenir,
+    // o pencere içinden karışık şekilde adaylar çekilir -> rating'ler yakın olur.
+    function pickCloseRatingCandidates(sortedByRatingDesc, count) {
+      const n = sortedByRatingDesc.length;
+      if (n <= count) return shuffleArray(sortedByRatingDesc);
+
+      // Dar bir pencere boyutu: 5 adaya yetecek kadar ama geniş havuza yayılmayacak kadar küçük.
+      const windowSize = Math.min(n, Math.max(count * 2, 8));
+      const anchorIndex = Math.floor(Math.random() * n);
+      let start = anchorIndex - Math.floor(windowSize / 2);
+      if (start < 0) start = 0;
+      if (start + windowSize > n) start = n - windowSize;
+
+      const windowArr = sortedByRatingDesc.slice(start, start + windowSize);
+      return shuffleArray(windowArr).slice(0, count);
+    }
+
+    function buildNexusDraftPool() {
+      const pool = [];
+      clubDatabase.forEach(club => {
+        [...club.players, ...club.legends].forEach(p => {
+          pool.push({
+            name: p.name, pos: p.pos, rating: p.rating,
+            country: p.country, league: p.league || club.league, club: club.name
+          });
+        });
+      });
+      return pool;
+    }
+
+    function applyGameModeUI() {
+      const isDraftMode = (gameMode === 'draft');
+      const badge = document.getElementById("modeBadge");
+      if (badge) badge.innerText = isDraftMode ? "NEXUSDRAFT" : "NEXUSBUILDER";
+      const btnEra = document.getElementById("btnEra");
+      const btnTeam = document.getElementById("btnTeam");
+      if (btnEra) btnEra.style.display = isDraftMode ? "none" : "";
+      if (btnTeam) btnTeam.style.display = isDraftMode ? "none" : "";
+      const instruction = document.getElementById("draftInstruction");
+      if (instruction && isDraftMode) {
+        instruction.innerText = "Rating'ler birbirine yakın! Asıl fark KİMYA'da — kadronla en uyumlu adayı seç:";
+      } else if (instruction) {
+        instruction.innerText = "Aşağıdan 1 oyuncu seç, sahadaki boş kutulara tıkla:";
+      }
+    }
+
+    function startNexusDraftSlot() {
+      if (nexusDraftPool.length === 0) nexusDraftPool = buildNexusDraftPool();
+
+      const posData = formations[activeFormation];
+      const slotIndex = pitchSquad.findIndex(p => p === null);
+      if (slotIndex === -1) return;
+
+      const label = posData[slotIndex].label;
+      document.getElementById("stepPhaseLabel").innerHTML = 'NEXUSDRAFT (<span id="teamStep">' + (slotIndex + 1) + '</span>/11)';
+      document.getElementById("clubTitle").innerText = positionFullName(label) + " (" + label + ")";
+
+      // Aday havuzunu karıştır ve tekilleştir (aynı oyuncu iki kez çıkmasın)
+      const shuffled = shuffleArray(nexusDraftPool.filter(p => p.pos === label));
+      const deduped = [];
+      const usedKeys = new Set();
+      shuffled.forEach(c => {
+        const key = c.name + '|' + c.club + '|' + c.pos;
+        if (usedKeys.has(key)) return;
+        usedKeys.add(key);
+        deduped.push(c);
+      });
+      deduped.sort((a, b) => b.rating - a.rating);
+
+      // Şansa göre rastgele bir "seviye" (yüksek/orta/düşük rating bandı) seçilir,
+      // sonra o bandın içinden birbirine YAKIN rating'li 5 aday sunulur.
+      // Böylece bazen hepsi ~90, bazen hepsi ~87-85-86 gibi dar bir aralıkta çıkar.
+      const picked = pickCloseRatingCandidates(deduped, 5);
+      picked.sort((a, b) => a.rating - b.rating);
+      nexusDraftOptions = picked;
+
+      renderNexusDraftOptions();
+      startTimer();
+    }
+
+    function renderNexusDraftOptions() {
+      const listElem = document.getElementById("playerList");
+      listElem.innerHTML = "";
+
+      nexusDraftOptions.forEach((p, idx) => {
+        const card = document.createElement("div");
+        card.className = "player-card";
+        const colorStyle = getRatingColor(p.rating);
+
+        card.innerHTML = `
+          <div>
+            <b style="color: #f4f4f5; font-size: 13px;">${p.name}</b>
+            <span style="font-size: 11px; color: #a1a1aa;">(${p.pos} - ${p.country})</span>
+            <div style="font-size:10px; color:#71717a;">${escapeHtml(p.club)}</div>
+          </div>
+          <span class="badge" style="background: ${colorStyle.bg}; color: ${colorStyle.text}; box-shadow: ${colorStyle.glow};">${p.rating}</span>
+        `;
+        card.onclick = () => pickNexusDraftOption(idx);
+        listElem.appendChild(card);
+      });
+    }
+
+    function pickNexusDraftOption(idx) {
+      stopTimer();
+      const chosen = nexusDraftOptions[idx];
+      if (!chosen) return;
+      const slotIndex = pitchSquad.findIndex(p => p === null);
+      if (slotIndex === -1) return;
+
+      pitchSquad[slotIndex] = Object.assign({}, chosen);
+      nexusDraftPool = nexusDraftPool.filter(p => !(p.name === chosen.name && p.club === chosen.club && p.pos === chosen.pos));
+
+      filledCount++;
+      document.getElementById("squadCount").innerText = filledCount;
+      nexusDraftOptions = [];
+      renderPitchSlots();
+
+      if (filledCount === 11) {
+        showCoachSelection();
+      } else {
+        startNexusDraftSlot();
+      }
+    }
+
+    function autoPickNexusDraftOption() {
+      if (nexusDraftOptions.length === 0) return;
+      // Süre dolunca en zayıf seçenek otomatik alınır: kimya artık ratingle birlikte hesaba katılır.
+      const score = (p) => p.rating + computeChemistryContribution(p) * 2;
+      let lowestIdx = 0;
+      for (let i = 1; i < nexusDraftOptions.length; i++) {
+        if (score(nexusDraftOptions[i]) < score(nexusDraftOptions[lowestIdx])) lowestIdx = i;
+      }
+      pickNexusDraftOption(lowestIdx);
+    }
+
+    // ---------- LOBİDE MOD SEÇİMİ ----------
+    function setGameMode(mode) {
+      if (!isHost) return;
+      gameMode = mode;
+      renderGameModeControls();
+      broadcastLobby();
+    }
+
+    function renderGameModeControls() {
+      const btnBuilder = document.getElementById("modeBtnBuilder");
+      const btnDraft = document.getElementById("modeBtnDraft");
+      if (btnBuilder) btnBuilder.classList.toggle("active", gameMode === 'builder');
+      if (btnDraft) btnDraft.classList.toggle("active", gameMode === 'draft');
+      const info = document.getElementById("gameModeInfo");
+      if (info) info.innerText = "Oyun Modu: " + (gameMode === 'draft' ? "NEXUSDRAFT" : "NEXUSBUILDER");
     }
 
     function loadNextClub() {
@@ -2542,6 +2788,8 @@
       hasChangedEraThisClub = false;
       selectedPlayerFromList = null;
       swapSource = null;
+      nexusDraftPool = [];
+      nexusDraftOptions = [];
 
       eraLimitLeft = 3;
       teamLimitLeft = 3;
@@ -2678,7 +2926,7 @@
     }
 
     function broadcastLobby() {
-      const payload = { type: 'lobby', players, draftTimerDuration };
+      const payload = { type: 'lobby', players, draftTimerDuration, gameMode };
       Object.values(connections).forEach(c => { try { c.send(payload); } catch (e) {} });
       renderLobby();
       renderStatusWidget();
@@ -2731,7 +2979,9 @@
       if (data.type === 'lobby') {
         players = data.players;
         if (data.draftTimerDuration) draftTimerDuration = data.draftTimerDuration;
+        if (data.gameMode) gameMode = data.gameMode;
         renderDraftTimerControls();
+        renderGameModeControls();
         renderLobby();
         renderStatusWidget();
         renderWaitingList();
@@ -2770,11 +3020,14 @@
         document.getElementById("roomCodeText").innerText = roomCode;
         document.getElementById("startDraftBtn").style.display = "block";
         document.getElementById("draftTimerHostControls").style.display = "block";
+        document.getElementById("gameModeHostControls").style.display = "block";
       } else {
         document.getElementById("lobbyWaitMsg").style.display = "block";
         document.getElementById("draftTimerInfo").style.display = "block";
+        document.getElementById("gameModeInfo").style.display = "block";
       }
       renderDraftTimerControls();
+      renderGameModeControls();
       renderLobby();
     }
 
@@ -2917,22 +3170,73 @@
       return { def: avgFor(defPos), mid: avgFor(midPos), att: avgFor(attPos) };
     }
 
-    function simulateOnlineMatch(homeTeam, awayTeam) {
-      const homeBonus = 5; // ev sahibi avantajı (arttırıldı)
-      const powerHome = Math.round(homeTeam.power + homeTeam.chem * 0.50) + homeBonus;
-      const powerAway = Math.round(awayTeam.power + awayTeam.chem * 0.50);
-      const diff = powerHome - powerAway;
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-      let lambdaHome = 1.3 + (powerHome - 78) * 0.045 + diff * 0.025;
-      let lambdaAway = 1.3 + (powerAway - 78) * 0.045 - diff * 0.025;
+    // Taktik çarpanlarını takımın GERÇEK hat gücüne göre dinamik hesaplar.
+    // ownAtt/ownDef: kendi hücum ve savunma hattı rating ortalaması (computeLineAverages'tan gelir)
+    const LINE_BASELINE = 75; // ortalama bir hattın referans rating'i
+    function getTacticMultipliers(tactic, ownAtt, ownDef) {
+      if (tactic === 'ofansif') {
+        // Hücum hattın ne kadar güçlüyse, ofansif oynamanın gol getirisi o kadar büyür.
+        // Zayıf bir hücum hattıyla ofansif oynamak riski artırır ama getiriyi pek artırmaz.
+        const attFactor = clamp((ownAtt - LINE_BASELINE) * 0.010, -0.10, 0.18);
+        const own = clamp(1.16 + attFactor, 0.95, 1.34);
+        // İleri çıkmak savunmada boşluk açar: bu boşluğu zayıf bir savunma çok daha pahalıya öder,
+        // güçlü bir savunma hattı ise açığı büyük ölçüde kapatır.
+        const defVulnerability = clamp((LINE_BASELINE - ownDef) * 0.006, -0.05, 0.12);
+        const opp = clamp(1.10 + defVulnerability, 1.00, 1.22);
+        return { own, opp };
+      }
+      if (tactic === 'defansif') {
+        // Geriye yaslanmak hücum katkını CİDDİ oranda azaltır (az adam ileri çıkar, riske girilmez).
+        // Defansif seçen bir takımın kendi gol sayısı artık belirgin şekilde düşük kalır.
+        const own = 0.65;
+        // Asıl fark burada: savunma hattın ne kadar güçlüyse, gol yeme oranın o kadar düşer.
+        // Zayıf bir savunmayla "defansif" oynamak seni pek korumaz; kalite şart.
+        const defBonus = clamp((ownDef - LINE_BASELINE) * 0.014, -0.10, 0.32);
+        const opp = clamp(0.80 - defBonus, 0.48, 0.95);
+        return { own, opp };
+      }
+      // Dengeli: aşırı uçlara gitmeden, kendi hat kalitenin hafifçe yansımasına izin verir.
+      const ownFactor = clamp((ownAtt - LINE_BASELINE) * 0.004, -0.04, 0.06);
+      const defFactor = clamp((ownDef - LINE_BASELINE) * 0.004, -0.04, 0.06);
+      return { own: clamp(1.00 + ownFactor, 0.94, 1.08), opp: clamp(1.00 - defFactor, 0.92, 1.08) };
+    }
+
+    function simulateOnlineMatch(homeTeam, awayTeam) {
+      const homeBonus = 4; // ev sahibi avantajı
+      const isDraft = (gameMode === 'draft');
+
+      // NEXUSDRAFT'ta oyuncu havuzu zaten dar bir rating bandından seçildiği (genelde yüksek rating'li
+      // adaylar) VE kimyanın etkisi kasıtlı olarak öne çıkarıldığı için, iki takımın toplam "gücü" neredeyse
+      // her maçta NEXUSBUILDER'a göre çok daha yüksek çıkıyordu. Bu da gol beklentisini sürekli tavana
+      // yapıştırıp 7-5 gibi gerçek dışı skorlara yol açıyordu. Bu yüzden NEXUSDRAFT için referans (baseline)
+      // ve katsayılar ayrı kalibre edildi: kimya hâlâ asıl belirleyici ama artık gücü öyle şişirmiyor.
+      const chemWeight = isDraft ? 0.55 : 0.50;
+      const powerBaseline = isDraft ? 92 : 78;
+      const powerCoef = isDraft ? 0.020 : 0.026;
+      const diffCoef = isDraft ? 0.010 : 0.013;
+      const attDefCoef = isDraft ? 0.016 : 0.022;
+      const midCoef = isDraft ? 0.010 : 0.013;
+      const lambdaCap = isDraft ? 2.9 : 3.4;
+
+      const powerHome = Math.round(homeTeam.power + homeTeam.chem * chemWeight) + homeBonus;
+      const powerAway = Math.round(awayTeam.power + awayTeam.chem * chemWeight);
+      // Aşırı skorları önlemek için güç farkı gerçekçi bir aralıkla sınırlanır
+      // (kimya bonusu çok büyüse bile maç tek taraflı bir katliama dönüşmez).
+      const diff = clamp(powerHome - powerAway, -32, 32);
+
+      // Gol beklentisi (lambda): baz değer ve katsayılar gerçekçi maç skorları (genelde 0-4 gol) için ayarlandı.
+      let lambdaHome = 1.15 + (powerHome - powerBaseline) * powerCoef + diff * diffCoef;
+      let lambdaAway = 1.15 + (powerAway - powerBaseline) * powerCoef - diff * diffCoef;
 
       // Pozisyon bazlı hat etkisi: hücum hattı rakibin savunma hattına karşı, orta saha kontrol/tempo belirler
       const linesHome = computeLineAverages(homeTeam);
       const linesAway = computeLineAverages(awayTeam);
 
-      const attVsDefHome = (linesHome.att - linesAway.def) * 0.035;
-      const attVsDefAway = (linesAway.att - linesHome.def) * 0.035;
-      const midControlDiff = (linesHome.mid - linesAway.mid) * 0.02;
+      const attVsDefHome = (linesHome.att - linesAway.def) * attDefCoef;
+      const attVsDefAway = (linesAway.att - linesHome.def) * attDefCoef;
+      const midControlDiff = (linesHome.mid - linesAway.mid) * midCoef;
 
       lambdaHome += attVsDefHome + midControlDiff;
       lambdaAway += attVsDefAway - midControlDiff;
@@ -2942,14 +3246,10 @@
       possessionHome = Math.min(72, Math.max(28, Math.round(possessionHome)));
       const possessionAway = 100 - possessionHome;
 
-      // Playoff oyun planı (taktik) etkisi: own = kendi hücumun, opp = rakibin sana attığı goller
-      const tacticMods = {
-        agresif: { own: 1.18, opp: 1.12 },
-        dengeli: { own: 1.00, opp: 1.00 },
-        savunma: { own: 0.85, opp: 0.75 }
-      };
-      const tacticHome = tacticMods[homeTeam.tactic] || tacticMods.dengeli;
-      const tacticAway = tacticMods[awayTeam.tactic] || tacticMods.dengeli;
+      // Playoff oyun planı (taktik) etkisi: own = kendi hücumun, opp = rakibin sana attığı goller.
+      // Artık her takımın KENDİ hat gücüne göre dinamik hesaplanıyor (bkz. getTacticMultipliers).
+      const tacticHome = getTacticMultipliers(homeTeam.tactic || 'dengeli', linesHome.att, linesHome.def);
+      const tacticAway = getTacticMultipliers(awayTeam.tactic || 'dengeli', linesAway.att, linesAway.def);
       lambdaHome *= tacticHome.own * tacticAway.opp;
       lambdaAway *= tacticAway.own * tacticHome.opp;
 
@@ -2969,8 +3269,8 @@
 
       function applyCardPenalty(side, minute) {
         const fractionRemaining = (90 - minute) / 90;
-        const penaltyFactor = 1 - 0.5 * fractionRemaining;   // kartlı takım: hücumu ciddi düşer
-        const boostFactor = 1 + 0.35 * fractionRemaining;     // rakip: fazla adamla hücumu artar
+        const penaltyFactor = 1 - 0.4 * fractionRemaining;   // kartlı takım: hücumu düşer
+        const boostFactor = 1 + 0.25 * fractionRemaining;    // rakip: fazla adamla hücumu artar
         if (side === 'home') {
           lambdaHome *= penaltyFactor;
           lambdaAway *= boostFactor;
@@ -3015,8 +3315,8 @@
         giveYellow(side, uniqueMinute());
       }
 
-      lambdaHome = Math.min(4.2, Math.max(0.3, lambdaHome));
-      lambdaAway = Math.min(4.2, Math.max(0.3, lambdaAway));
+      lambdaHome = Math.min(lambdaCap, Math.max(0.3, lambdaHome));
+      lambdaAway = Math.min(lambdaCap, Math.max(0.3, lambdaAway));
 
       const golHome = poissonRandom(lambdaHome);
       const golAway = poissonRandom(lambdaAway);
@@ -3249,7 +3549,7 @@
     function recordTacticChoice(id, tactic) {
       if (!tacticState) return;
       if (!tacticState.top4Info.some(t => t.id === id)) return;
-      if (!['agresif', 'dengeli', 'savunma'].includes(tactic)) return;
+      if (!['ofansif', 'dengeli', 'defansif'].includes(tactic)) return;
       tacticState.choices[id] = tactic;
       const allDone = tacticState.top4Info.every(t => tacticState.choices[t.id]);
       if (allDone) {
